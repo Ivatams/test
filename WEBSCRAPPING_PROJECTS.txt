@@ -1,0 +1,194 @@
+#######################WEBSCARAPPING###################################
+################## https://www.lagoslist.com.ng/business-directory/listing-category/hotels/#############
+
+#install.packages("xml2")
+library(xml2)
+library(tidyverse)
+library(rvest)
+library(magrittr)
+
+#rm(list = ls())
+
+Apartments <- data.frame()
+for (Pages_result in seq(from = 1, to = 7, by = 1)) {
+  #Beauty_Spa <- paste0("https://www.propertypro.ng/property-for-short-let/in/rivers/port-harcourt?page1=2",Pages_result,"&page")
+  Beauty_Spa <- paste0("https://www.lagoslist.com.ng/business-directory/listing-category/hotels/page",Pages_result,"//")
+  pages <- read_html(Beauty_Spa) # Read object into pages
+  HostName <- pages %>% html_nodes(".listing-title") %>% html_text() # extract product name CSS Code from website
+  PhoneNumber <- html_nodes(pages,".wpbdp-field-type-textfield.wpbdp-field-association-meta .value") %>% html_text(trim = T)
+  
+  HostAddress <- pages %>% html_nodes(".address-info ") %>%  html_text()
+  #Description <- pages %>% html_nodes(".value") %>% html_text()
+  length(PhoneNumber) <- length(HostName)
+  Apartments <- rbind(Apartments,data.frame(HostName,PhoneNumber,HostAddress,stringsAsFactors = FALSE))
+  print(paste("Page:",Pages_result))
+
+}
+
+view(Apartments)
+#write.csv(Apartments,"Hotels_Lagos")
+
+
+=============================================================================================================
+################## https://www.lagoslist.com.ng/business-directory/listing-category/hotels/#############
+
+#install.packages("xml2")
+library(xml2)
+library(tidyverse)
+library(rvest)
+library(magrittr)
+
+
+
+  #Beauty_Spa <- paste0("https://www.propertypro.ng/property-for-short-let/in/rivers/port-harcourt?page1=2",Pages_result,"&page")
+  Beauty_Spa <- paste0("https://www.businesslist.com.ng/companies/spa/1/")
+  pages <- read_html(Beauty_Spa) # Read object into pages
+  HostName <- pages %>% html_nodes("h4 a") %>% html_text() # extract product name CSS Code from website
+  Host_Links <- pages %>% html_nodes("h4 a") %>% 
+    html_attr("href") %>% paste("https://www.businesslist.com.ng",.,sep = "")
+  HostAddress <- pages %>% html_nodes(".address") %>%  html_text()
+  
+  get_PhoneNumber <- function(Host_Links){
+    phone_Page <- read_html(Host_Links)
+    PhoneContacts <- phone_Page %>% html_nodes(".phone") %>% html_text()
+    return(PhoneContacts)
+  }
+  
+  Phones <- sapply(Host_Links, FUN =  get_PhoneNumber, USE.NAMES = FALSE)
+  
+  
+  #length(Phones) <- length(HostName)
+  #class(Phones)
+  
+  df<- as.character(matrix(unlist(Phones), nrow = length(Phones), byrow = TRUE), stringsAsFactors = FALSE)
+                  
+  class(df)
+  Apartments <- cbind(data.frame(HostName,HostAddress,df,stringsAsFactors = FALSE))
+  
+  
+  #length(Phones)
+  #length(HostAddress)
+  #length(HostName)
+  View(Apartments)
+write.csv(Apartments,"Business_List1")
+
+=================================================================================================================
+################## https://www.lagoslist.com.ng/business-directory/listing-category/hotels/#############
+
+#install.packages("xml2")
+library(xml2)
+library(tidyverse)
+library(rvest)
+library(magrittr)
+
+#rm(list = ls())
+get_PhoneNumber <- function(Host_Links){
+  phone_Page <- read_html(Host_Links)
+  PhoneContacts <- phone_Page %>% html_nodes(".phone") %>% html_text()
+  return(PhoneContacts)
+}
+
+Apartments <- data.frame()
+
+  for(rest_results in seq(from = 1, to = 58, by= 1)){
+   link <- paste0("https://www.businesslist.com.ng/category/restaurants/",rest_results,"/") 
+  
+   pages <- read_html(link) # Read object into pages
+   HostName <- pages %>% html_nodes("h4 a") %>% html_text() # extract product name CSS Code from website
+   Host_Links <- pages %>% html_nodes("h4 a") %>% 
+     html_attr("href") %>% paste("https://www.businesslist.com.ng",.,sep = "")
+   HostAddress <- pages %>% html_nodes(".address") %>%  html_text()
+   Ratings <- pages %>% html_nodes(".rate") %>% html_text()
+   Phones <- sapply(Host_Links, FUN =  get_PhoneNumber, USE.NAMES = FALSE)
+   
+   df<- as.character(matrix(unlist(Phones), nrow = length(Phones), byrow = TRUE), stringsAsFactors = FALSE)
+   length(Ratings) <- length(HostName)
+   Apartments <- rbind(Apartments,data.frame(HostName,HostAddress,Ratings,df,stringsAsFactors = FALSE))
+      print(paste("Pages:", rest_results))
+  }
+
+  View(Apartments)
+#write.csv(Apartments,"Restaurants")
+
+=========================================Test_Google_Travel===================================================
+################## https://www.lagoslist.com.ng/business-directory/listing-category/hotels/#############
+
+#install.packages("xml2")
+library(xml2)
+library(tidyverse)
+library(rvest)
+library(magrittr)
+
+
+
+#==========================GET PHONE NUMBER ===========================
+get_PhoneNumber <- function(Host_Links){
+   phone_Page <- read_html(Host_Links)
+   PhoneContacts <- phone_Page %>% html_nodes(".CFH2De") %>% html_text()
+   return(PhoneContacts)
+}
+
+#==========================GET ADDRESS ===========================
+get_Addresses <- function(Host_Links){
+   Address_Page <- read_html(Host_Links)
+   Address <- Address_Page %>% html_nodes(".K4nuhf .CFH2De") %>% html_text()
+   return(Address)
+}
+
+#==========================GET HostName ===========================
+get_HostName <- function(Host_Links){
+   HostName_Page <- read_html(Host_Links)
+   HostName <- HostName_Page %>% html_nodes(".K4nuhf .CFH2De") %>% html_text()
+   return(HostName)
+}
+
+#==========================GET StarRating ===========================
+get_StarRating <- function(Host_Links){
+   StarRating_Page <- read_html(Host_Links)
+   StarRating <- StarRating_Page %>% html_nodes(".fnmyY > .CFH2De") %>% html_text()
+   return(StarRating)
+}
+
+#==========================GET Price ===========================
+get_Price <- function(Host_Links){
+   Price_Page <- read_html(Host_Links)
+   Price <- Price_Page %>% html_nodes(".fnmyY > .CFH2De") %>% html_text()
+   return(Price)
+}
+
+
+Apartments <- data.frame()
+
+  for(Page_result in seq(from = 1, to = 14, by= 1)){
+   link <- paste0("https://www.google.com/travel/hotels/Nigeria?q=top%20hotels%20in%20nigeria%20google%20travel&g2lb=2502548%2C2503771%2C2503781%2C4258168%2C4270442%2C4284970%2C4291517%2C4306835%2C4597339%2C4640247%2C4649665%2C4680677%2C4716128%2C4722435%2C4722900%2C4723331%2C4733969%2C4747697&hl=en-NG&gl=ng&cs=1&ssta=1&rp=EOj6_MK3lbO7dhDUp--Irfyc0eQBEOGU4_bnrcrTGRDTuremqM2_ml44AUAASAKiAQdOaWdlcmlh&ap=aAE&ictx=1&sa=X&ved=0CAAQ5JsGahcKEwjA--HskaD3AhUAAAAAHQAAAAAQCA&utm_campaign=sharing&utm_medium=link&utm_source=htls&ts=CAESCgoCCAMKAggDEAAaKwoNEgk6B05pZ2VyaWEaABIaEhQKBwjmDxAEGBkSBwjmDxAEGBoYATICEAAqCwoHKAE6A05HThoA") 
+  
+   pages <- read_html(link) # Read object into pages
+   HostName_Psuedo <- pages %>% html_nodes(".flySGb span") %>% html_text() # extract product name CSS Code from website
+   Host_Links <- pages %>% html_nodes(".flySGb span") %>% 
+     html_attr("href") %>% paste("https://www.google.com/",.,sep = "")
+   #HostAddress <- pages %>% html_nodes(".K4nuhf .CFH2De") %>%  html_text()
+   #Price <- pages %>% html_nodes(".prxS3d") %>% html_text()
+   #HostName. <- pages %>% html_nodes(".fZscne") %>% html_text()
+   #HostName <- pages %>% html_nodes(".fZscne") %>% html_text()
+   
+   #rm(list = ls())
+   
+   #==========================Iterrate Through the Pages==================
+   Phones <- sapply(Host_Links, FUN =  get_PhoneNumber, USE.NAMES = FALSE)
+   Price <- sapply(Host_Links, FUN =  get_Price, USE.NAMES = FALSE)
+   Address <- sapply(Host_Links, FUN =  get_Addresses, USE.NAMES = FALSE)
+   Rating <- sapply(Host_Links, FUN =  get_StarRating, USE.NAMES = FALSE)
+   HostNames <- sapply(Host_Links, FUN = get_HostName, USE.NAMES = FALSE)
+   
+   
+   
+   #df<- as.character(matrix(unlist(Phones), nrow = length(Phones), byrow = TRUE), stringsAsFactors = FALSE)
+   #length(Ratings) <- length(HostName)
+   Apartments <- rbind(Apartments,data.frame(HostNames,Address,Phones,Rating,Price,HostName_Psuedo,stringsAsFactors = FALSE))
+      print(paste("Pages:", Page_result))
+  }
+
+      
+ View(Apartments)
+#write.csv(Apartments,"Apartments_Resorts")
+
